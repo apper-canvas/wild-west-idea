@@ -1,0 +1,47 @@
+[
+  {
+    "Id": 1,
+    "type": "outlaw",
+    "x": 200,
+    "y": 250,
+    "speed": 1.2,
+    "points": 150,
+    "isHit": false
+  },
+  {
+    "Id": 2,
+    "type": "bottle",
+    "x": 500,
+    "y": 180,
+    "speed": 0.8,
+    "points": 75,
+    "isHit": false
+  },
+  {
+    "Id": 3,
+    "type": "poster",
+    "x": 750,
+    "y": 320,
+    "speed": 1.0,
+    "points": 100,
+    "isHit": false
+  },
+  {
+    "Id": 4,
+    "type": "bandit",
+    "x": 350,
+    "y": 200,
+    "speed": 1.8,
+    "points": 250,
+    "isHit": false
+  },
+  {
+    "Id": 5,
+    "type": "sheriff",
+    "x": 600,
+    "y": 280,
+    "speed": 1.0,
+    "points": -150,
+    "isHit": false
+  }
+]

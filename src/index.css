@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import react-toastify CSS */
+@import 'react-toastify/dist/ReactToastify.css';
+
+/* Ensure scrollbars are visible */
+body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  margin: 0;
+  min-height: 100vh;
+  cursor: none; /* Hide default cursor for custom crosshair */
+}
+
+/* Prevent horizontal overflow */
+* {
+  max-width: 100%;
+}
+
+/* Main content areas must allow scroll */
+.main-content {
+  overflow-y: auto;
+  height: 100vh;
+}
+
+/* Custom crosshair cursor */
+.crosshair-cursor {
+  cursor: none;
+}
+
+.crosshair {
+  position: fixed;
+  pointer-events: none;
+  z-index: 1000;
+  transition: transform 0.1s ease-out;
+}
+
+/* Wood texture pattern */
+.wood-texture {
+  background-image: 
+    linear-gradient(90deg, rgba(139, 69, 19, 0.3) 1px, transparent 1px),
+    linear-gradient(rgba(139, 69, 19, 0.2) 1px, transparent 1px);
+  background-size: 20px 20px, 20px 20px;
+}
+
+/* Worn paper texture */
+.paper-texture {
+  background-image: 
+    radial-gradient(circle at 20% 20%, rgba(0,0,0,0.1) 1px, transparent 1px),
+    radial-gradient(circle at 80% 80%, rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-size: 15px 15px, 25px 25px;
+}
+
+/* Dust particle animations */
+.dust-particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: rgba(205, 133, 63, 0.3);
+  border-radius: 50%;
+  animation: dust 8s infinite linear;
+}
+
+.dust-particle:nth-child(odd) {
+  animation-delay: -2s;
+  width: 1px;
+  height: 1px;
+}
+
+.dust-particle:nth-child(3n) {
+  animation-delay: -4s;
+  background: rgba(255, 215, 0, 0.2);
+}
+
+@layer utilities {
+  /* Only use scrollbar-hide for specific UI elements, never main content */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

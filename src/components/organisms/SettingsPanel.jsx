@@ -22,7 +22,7 @@ const SettingsPanel = ({
       
       setLoading(true)
       try {
-        const result = await settingsService.getSettings()
+const result = await settingsService.getSettings()
         setSettings(result)
       } catch (error) {
         console.error('Failed to load settings:', error)
@@ -39,7 +39,7 @@ const SettingsPanel = ({
   const updateSetting = async (key, value) => {
     try {
       const updates = { [key]: value }
-      const result = await settingsService.updateSettings(updates)
+const result = await settingsService.updateSettings(updates)
       setSettings(result)
       toast.success('Settings saved')
     } catch (error) {
@@ -51,7 +51,7 @@ const SettingsPanel = ({
   // Reset settings
   const resetSettings = async () => {
     try {
-      const result = await settingsService.resetSettings()
+const result = await settingsService.resetSettings()
       setSettings(result)
       toast.success('Settings reset to defaults')
     } catch (error) {

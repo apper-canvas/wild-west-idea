@@ -21,7 +21,7 @@ const Home = () => {
     const loadGameState = async () => {
       setLoading(true)
       try {
-        const result = await gameStateService.getGameState()
+const result = await gameStateService.getGameState()
         setGameState(result)
       } catch (error) {
         console.error('Failed to load game state:', error)
@@ -40,7 +40,7 @@ const Home = () => {
       const timer = setInterval(async () => {
         try {
           const newTime = Math.max(0, gameState.timeRemaining - 1)
-          const updatedState = await gameStateService.updateGameState({ 
+const updatedState = await gameStateService.updateGameState({
             timeRemaining: newTime 
           })
           setGameState(updatedState)
@@ -65,7 +65,7 @@ const Home = () => {
   // Start game
   const handleStartGame = async (difficulty) => {
     try {
-      const newGameState = await gameStateService.startGame(difficulty)
+const newGameState = await gameStateService.startGame(difficulty)
       setGameState(newGameState)
       setGameScreen('playing')
       setIsNewHighScore(false)
@@ -80,7 +80,7 @@ const Home = () => {
   const updateGameState = useCallback(async (updates) => {
     try {
       const oldHighScore = gameState.highScore
-      const updatedState = await gameStateService.updateGameState(updates)
+const updatedState = await gameStateService.updateGameState(updates)
       setGameState(updatedState)
 
       // Check for new high score
@@ -96,7 +96,7 @@ const Home = () => {
   // End game
   const handleGameEnd = async () => {
     try {
-      const endedState = await gameStateService.endGame()
+const endedState = await gameStateService.endGame()
       setGameState(endedState)
       setGameScreen('gameOver')
       
@@ -113,7 +113,7 @@ const Home = () => {
   // Pause/Resume game
   const handlePauseToggle = async () => {
     try {
-      const updatedState = await gameStateService.updateGameState({ 
+const updatedState = await gameStateService.updateGameState({
         isPaused: !gameState.isPaused 
       })
       setGameState(updatedState)
@@ -127,7 +127,7 @@ const Home = () => {
   // Quit to main menu
   const handleQuitGame = async () => {
     try {
-      await gameStateService.resetGame()
+await gameStateService.resetGame()
       setGameScreen('menu')
       
       if (gameTimer) {
@@ -152,7 +152,7 @@ const Home = () => {
   // Return to main menu
   const handleMainMenu = async () => {
     try {
-      await gameStateService.resetGame()
+await gameStateService.resetGame()
       setGameScreen('menu')
       setIsNewHighScore(false)
     } catch (error) {

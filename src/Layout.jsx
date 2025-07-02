@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react'
 import { Outlet } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import ApperIcon from '@/components/ApperIcon'
+import Button from '@/components/atoms/Button'
+import { AuthContext } from '@/App'
 
 const Layout = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   const [isHovered, setIsHovered] = useState(false)
+  const { logout } = useContext(AuthContext) || {}
+  const { user, isAuthenticated } = useSelector((state) => state.user || { user: null, isAuthenticated: false })
 
   // Track mouse position for custom crosshair
   useEffect(() => {
@@ -26,8 +31,23 @@ const Layout = () => {
     }
   }, [])
 
-  return (
+return (
     <div className="h-screen w-screen overflow-hidden bg-background relative">
+      {/* Logout Button */}
+      {isAuthenticated && (
+        <div className="absolute top-4 right-4 z-50">
+          <Button
+            variant="secondary"
+            size="small"
+            icon="LogOut"
+            onClick={logout}
+            className="px-3"
+          >
+            Logout
+          </Button>
+        </div>
+      )}
+
       {/* Custom Crosshair */}
       <div 
         className={`crosshair ${isHovered ? 'opacity-100' : 'opacity-0'}`}

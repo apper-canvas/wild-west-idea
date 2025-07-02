@@ -1,71 +1,211 @@
-const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms))
-
 class TargetService {
   constructor() {
-    this.data = []
-    this.nextId = 1
+    this.apperClient = null;
+    this.initializeClient();
+  }
+
+  initializeClient() {
+    const { ApperClient } = window.ApperSDK;
+    this.apperClient = new ApperClient({
+      apperProjectId: import.meta.env.VITE_APPER_PROJECT_ID,
+      apperPublicKey: import.meta.env.VITE_APPER_PUBLIC_KEY
+    });
   }
 
   async getAll() {
-    await delay(50)
-    return [...this.data]
+    try {
+      const params = {
+        fields: [
+          { field: { Name: "type" } },
+          { field: { Name: "x" } },
+          { field: { Name: "y" } },
+          { field: { Name: "speed" } },
+          { field: { Name: "points" } },
+          { field: { Name: "is_hit" } },
+          { field: { Name: "direction" } },
+          { field: { Name: "created_at" } }
+        ],
+        orderBy: [
+          { fieldName: "created_at", sorttype: "DESC" }
+        ]
+      };
+
+      const response = await this.apperClient.fetchRecords('target', params);
+      
+      if (!response.success) {
+        console.error('Failed to fetch targets:', response.message);
+        return [];
+      }
+
+      return response.data.map(target => this.transformToClientFormat(target));
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error('Error fetching targets:', error?.response?.data?.message);
+      } else {
+        console.error(error.message);
+      }
+      return [];
+    }
   }
 
   async getById(id) {
-    await delay(50)
-    const target = this.data.find(item => item.Id === parseInt(id))
-    return target ? { ...target } : null
+    try {
+      const params = {
+        fields: [
+          { field: { Name: "type" } },
+          { field: { Name: "x" } },
+          { field: { Name: "y" } },
+          { field: { Name: "speed" } },
+          { field: { Name: "points" } },
+          { field: { Name: "is_hit" } },
+          { field: { Name: "direction" } },
+          { field: { Name: "created_at" } }
+        ]
+      };
+
+      const response = await this.apperClient.getRecordById('target', parseInt(id), params);
+      
+      if (!response.success) {
+        console.error('Failed to fetch target:', response.message);
+        return null;
+      }
+
+      return this.transformToClientFormat(response.data);
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error('Error fetching target:', error?.response?.data?.message);
+      } else {
+        console.error(error.message);
+      }
+      return null;
+    }
   }
 
   async create(targetData) {
-    await delay(100)
-    const newTarget = {
-      Id: this.nextId++,
-      type: targetData.type || 'outlaw',
-      x: targetData.x || Math.random() * 800,
-      y: targetData.y || Math.random() * 400 + 100,
-      speed: targetData.speed || 1,
-      points: targetData.points || 100,
-      isHit: false,
-      direction: targetData.direction || (Math.random() > 0.5 ? 1 : -1),
-      createdAt: Date.now()
+    try {
+      const dbData = this.transformToDbFormat(targetData);
+      
+      const params = {
+        records: [dbData]
+      };
+
+      const response = await this.apperClient.createRecord('target', params);
+      
+      if (!response.success) {
+        console.error('Failed to create target:', response.message);
+        return null;
+      }
+
+      if (response.results && response.results.length > 0 && response.results[0].success) {
+        return this.transformToClientFormat(response.results[0].data);
+      }
+
+      return null;
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error('Error creating target:', error?.response?.data?.message);
+      } else {
+        console.error(error.message);
+      }
+      return null;
     }
-    this.data.push(newTarget)
-    return { ...newTarget }
   }
 
   async update(id, updates) {
-    await delay(50)
-    const index = this.data.findIndex(item => item.Id === parseInt(id))
-    if (index === -1) return null
-    
-    this.data[index] = { ...this.data[index], ...updates }
-    return { ...this.data[index] }
+    try {
+      const dbUpdates = this.transformToDbFormat(updates);
+      
+      const params = {
+        records: [{
+          Id: parseInt(id),
+          ...dbUpdates
+        }]
+      };
+
+      const response = await this.apperClient.updateRecord('target', params);
+      
+      if (!response.success) {
+        console.error('Failed to update target:', response.message);
+        return null;
+      }
+
+      if (response.results && response.results.length > 0 && response.results[0].success) {
+        return this.transformToClientFormat(response.results[0].data);
+      }
+
+      return null;
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error('Error updating target:', error?.response?.data?.message);
+      } else {
+        console.error(error.message);
+      }
+      return null;
+    }
   }
 
   async delete(id) {
-    await delay(50)
-    const index = this.data.findIndex(item => item.Id === parseInt(id))
-    if (index === -1) return false
-    
-    this.data.splice(index, 1)
-    return true
+    try {
+      const params = {
+        RecordIds: [parseInt(id)]
+      };
+
+      const response = await this.apperClient.deleteRecord('target', params);
+      
+      if (!response.success) {
+        console.error('Failed to delete target:', response.message);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error('Error deleting target:', error?.response?.data?.message);
+      } else {
+        console.error(error.message);
+      }
+      return false;
+    }
   }
 
   async clearAll() {
-    await delay(100)
-    this.data = []
-    return true
+    try {
+      // First get all targets
+      const targets = await this.getAll();
+      
+      if (targets.length === 0) return true;
+
+      const targetIds = targets.map(target => target.Id);
+      
+      const params = {
+        RecordIds: targetIds
+      };
+
+      const response = await this.apperClient.deleteRecord('target', params);
+      
+      if (!response.success) {
+        console.error('Failed to clear all targets:', response.message);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      if (error?.response?.data?.message) {
+        console.error('Error clearing targets:', error?.response?.data?.message);
+      } else {
+        console.error(error.message);
+      }
+      return false;
+    }
   }
 
   async hitTarget(id) {
-    await delay(50)
-    const target = await this.update(id, { isHit: true })
+    const target = await this.update(id, { isHit: true });
     if (target) {
       // Remove target after short delay to show hit animation
-      setTimeout(() => this.delete(id), 200)
+      setTimeout(() => this.delete(id), 200);
     }
-    return target
+    return target;
   }
 
   generateTarget(difficulty = 'medium') {
@@ -88,17 +228,51 @@ class TargetService {
         { type: 'bandit', points: 300, speed: 2.5 },
         { type: 'sheriff', points: -100, speed: 1.2 } // Don't shoot the sheriff!
       ]
-    }
+    };
 
-    const availableTargets = targetTypes[difficulty] || targetTypes.medium
-    const targetTemplate = availableTargets[Math.floor(Math.random() * availableTargets.length)]
+    const availableTargets = targetTypes[difficulty] || targetTypes.medium;
+    const targetTemplate = availableTargets[Math.floor(Math.random() * availableTargets.length)];
     
     return {
       ...targetTemplate,
       x: Math.random() > 0.5 ? -100 : window.innerWidth + 100,
       y: 150 + Math.random() * 300,
-      direction: Math.random() > 0.5 ? 1 : -1
+      direction: Math.random() > 0.5 ? 1 : -1,
+      created_at: new Date().toISOString()
+    };
+  }
+
+  transformToClientFormat(dbData) {
+    return {
+      Id: dbData.Id,
+      type: dbData.type || 'outlaw',
+      x: dbData.x || 0,
+      y: dbData.y || 0,
+      speed: dbData.speed || 1,
+      points: dbData.points || 100,
+      isHit: dbData.is_hit || false,
+      direction: dbData.direction || 1,
+      createdAt: dbData.created_at || Date.now()
+    };
+  }
+
+  transformToDbFormat(clientData) {
+    const dbData = {};
+    
+    if (clientData.type !== undefined) dbData.type = clientData.type;
+    if (clientData.x !== undefined) dbData.x = clientData.x;
+    if (clientData.y !== undefined) dbData.y = clientData.y;
+    if (clientData.speed !== undefined) dbData.speed = parseFloat(clientData.speed);
+    if (clientData.points !== undefined) dbData.points = clientData.points;
+    if (clientData.isHit !== undefined) dbData.is_hit = clientData.isHit;
+    if (clientData.direction !== undefined) dbData.direction = clientData.direction;
+    if (clientData.createdAt !== undefined) {
+      dbData.created_at = typeof clientData.createdAt === 'number' 
+        ? new Date(clientData.createdAt).toISOString()
+        : clientData.createdAt;
     }
+
+    return dbData;
   }
 }
 
